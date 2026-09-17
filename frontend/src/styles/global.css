@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+  --paper:#f3efe6;
+  --ink:#252521;
+  --muted:#74726a;
+  --line:#d7d1c5;
+  --ochre:#bb8c3d;
+  --panel:#e8e0d0;
+  --sans:Manrope,Arial,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+:root[data-theme='dark'] { --paper:#20201d; --ink:#f3efe6; --muted:#b7b2a7; --line:#4a4942; --panel:#2a2925; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 var(--sans); transition:background .25s,color .25s; }
+a { color:inherit; text-decoration:none; }
+button { font:inherit; }
+.page-shell { max-width:1400px; margin:auto; padding-inline:clamp(1.25rem,4vw,4.5rem); }
+.eyebrow { margin:0 0 1.2rem; color:var(--muted); font:500 .7rem/1.4 var(--mono); letter-spacing:.08em; text-transform:uppercase; }
+.section-label { margin-bottom:1.5rem; color:var(--ink); font-size:.95rem; line-height:1.35; letter-spacing:.07em; }
+
+.site-header { position:sticky; top:0; z-index:10; height:86px; padding:0 max(calc((100vw - 1400px)/2 + 4.5rem),clamp(1.25rem,4vw,4.5rem)); display:flex; align-items:center; border-bottom:1px solid var(--line); background:color-mix(in srgb,var(--paper) 92%,transparent); backdrop-filter:blur(14px); }
+.wordmark.wordmark--atlas { display:inline-flex; gap:.05em; font:600 1.05rem var(--sans); letter-spacing:-.03em; }
+.wordmark.wordmark--atlas span { color:var(--ochre); }
+.site-header nav { display:flex; gap:2rem; margin-left:auto; margin-right:3rem; }
+.site-header nav a { color:var(--muted); font-size:.73rem; letter-spacing:.09em; text-transform:uppercase; }
+.site-header nav a:hover,.site-header nav a:focus-visible { color:var(--ink); outline:0; }
+.header-actions { display:flex; align-items:center; }
+.theme-toggle { width:35px; height:20px; border:1px solid var(--ink); border-radius:99px; padding:2px; background:transparent; cursor:pointer; }
+.theme-toggle span { display:block; width:12px; height:12px; border-radius:50%; background:var(--ink); transition:transform .2s; }
+:root[data-theme='dark'] .theme-toggle span { transform:translateX(13px); }
+.mobile-nav { display:none; }
+
+.button { display:inline-flex; align-items:center; gap:2.5rem; padding:.9rem 1rem; font-size:.75rem; letter-spacing:.06em; text-transform:uppercase; }
+.button-dark { background:var(--ink); color:var(--paper); }
+.text-link { padding-bottom:.2rem; border-bottom:1px solid var(--ink); font:500 .72rem var(--mono); letter-spacing:.04em; text-transform:uppercase; transition:color .2s,border-color .2s; }
+.text-link:hover,.text-link:focus-visible { border-color:var(--ochre); color:var(--ochre); outline:0; }
+.arrow-icon { position:relative; display:inline-block; width:.9rem; height:.75rem; flex:0 0 auto; color:currentColor; }
+.arrow-icon::before { content:''; position:absolute; top:50%; left:0; width:.78rem; height:1px; background:currentColor; transform:translateY(-50%); }
+.arrow-icon::after { content:''; position:absolute; top:50%; right:0; width:.38rem; height:.38rem; border-top:1px solid currentColor; border-right:1px solid currentColor; transform:translateY(-50%) rotate(45deg); }
+.arrow-back { margin-right:.35rem; }
+.arrow-back::after { right:auto; left:0; border:0; border-bottom:1px solid currentColor; border-left:1px solid currentColor; transform:translateY(-50%) rotate(45deg); }
+.arrow-back::before { left:.12rem; }
+.site-footer { max-width:1400px; margin:auto; padding:1.5rem clamp(1.25rem,4vw,4.5rem) 6rem; border-top:1px solid var(--line); color:var(--muted); font:.66rem var(--mono); }
+.site-footer p { margin:0; }
+
+@media (max-width:700px) {
+  body { padding-bottom:68px; }
+  .site-header { height:70px; padding-inline:1.25rem; }
+  .site-header nav { display:none; }
+  .header-actions { margin-left:auto; }
+  .mobile-nav { position:fixed; bottom:0; left:0; right:0; z-index:5; height:68px; display:flex; align-items:center; justify-content:space-around; border-top:1px solid var(--line); background:var(--paper); }
+  .mobile-nav a { color:var(--muted); font:.58rem var(--mono); text-transform:uppercase; }
+  .mobile-nav a:hover,.mobile-nav a:focus-visible { color:var(--ochre); outline:0; }
+  .site-footer { padding-bottom:1.5rem; }
+}

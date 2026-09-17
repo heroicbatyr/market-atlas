@@ -1,0 +1,11 @@
+---
+import FinanceResearch from '../../components/FinanceResearch.astro';
+import stocks from '../../../../backend/src/main/resources/fmp-supported-tickers.json';
+
+export function getStaticPaths() {
+  return stocks.map(stock => ({ params: { symbol: stock.symbol }, props: { stock } }));
+}
+
+const { stock } = Astro.props;
+---
+<FinanceResearch stock={stock} />

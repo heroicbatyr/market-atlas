@@ -1,0 +1,255 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import stocks from '../../../backend/src/main/resources/fmp-supported-tickers.json';
+import en from '../i18n/en.json';
+
+interface Props { stock: { symbol: string; name: string; sector: string; category: string }; genericTicker?: boolean }
+const { stock, genericTicker = false } = Astro.props;
+const apiBase = import.meta.env.PUBLIC_FINANCE_API_BASE_URL || 'https://server.batyrbek.com';
+const compareSymbol = stock.symbol === 'NVDA' ? 'AMD' : 'NVDA';
+---
+<BaseLayout title={`${stock.name} (${stock.symbol}) - Market Atlas`} description={`Research ${stock.name} price history, fundamentals, and annual financial performance.`}>
+  <Header active="Finance" />
+  <main class="finance-page page-shell" data-finance-app data-generic-ticker={genericTicker ? 'true' : undefined} data-api-base={apiBase} data-initial-ticker={stock.symbol} data-stocks={JSON.stringify(stocks)} data-copy={JSON.stringify(en.finance.company)}>
+    <header class="finance-intro">
+      <div>
+        <a class="finance-back" href="/finance"><span class="arrow-icon arrow-back" aria-hidden="true"></span>{en.finance.company.back}</a>
+        <p class="eyebrow section-label">{stock.sector} · {stock.symbol}</p>
+        <h1>{stock.name}</h1>
+      </div>
+      <div class="finance-intro-aside">
+        <p>{stock.category}. Review price history, essential fundamentals, and annual financial performance.</p>
+        <a class="button button-dark" href={`/finance/compare?symbols=${stock.symbol},${compareSymbol}`}>{en.finance.company.compare}</a>
+      </div>
+    </header>
+
+    <section class="company-toolbar" aria-label={en.finance.company.companyNavigation}>
+      <form data-company-jump>
+        <label for="company-jump">{en.finance.company.jumpLabel}</label>
+        <div><input id="company-jump" data-company-jump-input list="company-options" autocomplete="off" placeholder={en.finance.company.jumpPlaceholder} /><button type="submit" aria-label={en.finance.landing.openCompany}><span class="arrow-icon" aria-hidden="true"></span></button></div>
+        <datalist id="company-options">{stocks.map(item => <option value={item.symbol}>{item.name}</option>)}</datalist>
+      </form>
+      <a href={`/finance/compare?symbols=${stock.symbol},${compareSymbol}`}><span>{en.finance.company.compareLabel}</span><strong>{stock.symbol} {en.finance.company.compareAnother}</strong><i class="arrow-icon" aria-hidden="true"></i></a>
+      <p data-status data-kind="loading" role="status" aria-live="polite">{en.finance.company.loadingResearch.replace('{symbol}', stock.symbol)}</p>
+    </section>
+
+    <nav class="company-tabs" aria-label={en.finance.company.companyNavigation}>
+      <a href={`/finance/${stock.symbol}`} data-tab-link="overview" aria-current="page">{en.finance.company.overview}</a>
+      <a href={`/finance/${stock.symbol}?tab=financials`} data-tab-link="financials">{en.finance.company.financials}</a>
+      <a href={`/finance/${stock.symbol}?tab=earnings`} data-tab-link="earnings">{en.finance.company.earnings}</a>
+    </nav>
+
+    <section data-tab-panel="overview">
+      <section class="empty-state" data-empty-state hidden>
+        <p class="eyebrow">{en.finance.company.noResult}</p>
+        <p>{en.finance.company.unavailable}</p>
+      </section>
+
+      <div class="stock-results" data-results hidden>
+        <section class="quote-panel" aria-labelledby="company-name">
+          <div class="company-heading">
+            <div><p class="eyebrow" data-company-ticker>{stock.symbol}</p><h2 id="company-name" data-company-name>{stock.name}</h2><p class="company-classification" data-company-classification>{stock.sector}</p></div>
+            <div class="quote-value"><strong data-price>-</strong><span data-change data-direction="neutral">-</span></div>
+          </div>
+          <div class="metric-grid">
+            <article data-metric="marketCap"><p>{en.finance.company.metrics.marketCap}</p><strong data-market-cap>-</strong></article><article data-metric="peRatio"><p>{en.finance.company.metrics.peRatio}</p><strong data-pe>-</strong></article><article data-metric="eps"><p>{en.finance.company.metrics.eps}</p><strong data-eps>-</strong></article><article data-metric="volume"><p>{en.finance.company.metrics.volume}</p><strong data-volume>-</strong></article><article data-metric="revenueGrowth"><p>{en.finance.company.metrics.revenueGrowth}</p><strong data-revenue-growth>-</strong></article><article data-metric="netMargin"><p>{en.finance.company.metrics.netMargin}</p><strong data-net-margin>-</strong></article><article data-metric="freeCashFlow"><p>{en.finance.company.metrics.freeCashFlow}</p><strong data-free-cash-flow>-</strong></article><article data-metric="week52Low"><p>{en.finance.company.metrics.week52Low}</p><strong data-week-low>-</strong></article><article data-metric="week52High"><p>{en.finance.company.metrics.week52High}</p><strong data-week-high>-</strong></article>
+          </div>
+        </section>
+
+        <section class="chart-panel" aria-labelledby="chart-heading">
+          <div class="chart-heading">
+            <div><p class="eyebrow">{en.finance.company.priceHistory}</p><h2 id="chart-heading" data-chart-heading>{en.finance.company.oneYear}</h2><p class="chart-performance" data-performance data-direction="neutral">-</p></div><span data-resolution>{en.finance.company.dailyClose}</span>
+          </div>
+          <div class="range-selector" role="group" aria-label="Price history range">
+            {['1W', '1M', '6M', 'YTD', '1Y', '2Y', '5Y'].map(range =>
+              <button type="button" data-range={range.toLowerCase()} aria-pressed={range === '1Y'}>{range}</button>)}
+          </div>
+          <div class="chart-wrap" data-chart-wrap tabindex="0" aria-label="Use pointer or arrow keys to inspect prices">
+            <svg data-chart role="img" aria-label="Price history chart"></svg>
+            <div class="chart-tooltip" data-chart-tooltip hidden><time data-tooltip-date></time><strong data-tooltip-price></strong></div>
+            <p data-chart-status aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="business-panel" aria-labelledby="business-heading">
+          <div><p class="eyebrow">{en.finance.company.businessSnapshot}</p><h2 id="business-heading">{en.finance.company.businessHeading}</h2></div>
+          <div class="business-copy"><p data-description>{en.finance.company.descriptionLoading}</p><div class="profile-grid">
+            <article data-profile="ceo"><span>{en.finance.company.chiefExecutive}</span><strong data-ceo>-</strong></article><article data-profile="employees"><span>{en.finance.company.employees}</span><strong data-employees>-</strong></article><article data-profile="headquarters"><span>{en.finance.company.headquarters}</span><strong data-headquarters>-</strong></article><article data-profile="website"><span>{en.finance.company.website}</span><a data-website target="_blank" rel="noreferrer">-</a></article>
+          </div></div>
+        </section>
+
+        <footer class="data-note"><p><span data-source>FMP</span> {en.finance.company.dataAsOf} <time data-updated>-</time>.</p><p>{en.common.educationOnly}</p></footer>
+      </div>
+    </section>
+
+    <section class="financials-panel" data-tab-panel="financials" hidden aria-labelledby="financials-heading">
+      <header><div><p class="eyebrow">Annual statements</p><h2 id="financials-heading">Financial performance.</h2></div><p>Up to five reported fiscal years. Open an SEC filing to see the original report when available.</p></header>
+      <p class="financials-status" data-financials-status role="status" aria-live="polite">Financials load only when this tab is opened.</p>
+      <div data-financials-content hidden>
+        <div class="financial-chart-grid">
+          <article><p>Revenue</p><strong data-latest-revenue>-</strong><svg data-financial-chart="revenue" role="img" aria-label="Annual revenue"></svg></article>
+          <article><p>Net income</p><strong data-latest-net-income>-</strong><svg data-financial-chart="netIncome" role="img" aria-label="Annual net income"></svg></article>
+          <article><p>Free cash flow</p><strong data-latest-fcf>-</strong><svg data-financial-chart="freeCashFlow" role="img" aria-label="Annual free cash flow"></svg></article>
+        </div>
+        <div class="financial-table-wrap"><table>
+          <thead><tr><th>Year</th><th>Revenue</th><th>Operating income</th><th>Net income</th><th>EPS</th><th>Free cash flow</th><th>Filing</th></tr></thead>
+          <tbody data-financial-rows></tbody>
+        </table></div>
+        <div class="balance-grid">
+          <article><span>Cash &amp; equivalents</span><strong data-cash>-</strong></article>
+          <article><span>Total debt</span><strong data-debt>-</strong></article>
+          <article><span>Debt / equity</span><strong data-debt-equity>-</strong></article>
+        </div>
+        <footer class="data-note"><p><span data-financial-source>FMP</span> annual statements · As of <time data-financial-as-of>-</time>.</p><p>Educational purposes only - not investment advice.</p></footer>
+      </div>
+    </section>
+
+    <section class="earnings-panel" data-tab-panel="earnings" hidden aria-labelledby="earnings-heading">
+      <header><div><p class="eyebrow">Reported quarters</p><h2 id="earnings-heading">Earnings.</h2></div><p>Quarterly facts taken from SEC 10-Q filings. Expected dates and analyst estimates will appear only when a permitted source is configured.</p></header>
+      <p class="financials-status" data-earnings-status role="status" aria-live="polite">Earnings load only when this tab is opened.</p>
+      <div data-earnings-content hidden>
+        <p class="earnings-next">Next expected report <strong data-expected-earnings>Not available</strong></p>
+        <div class="financial-table-wrap"><table>
+          <thead><tr><th>Period end</th><th>Quarter</th><th>Revenue</th><th>Net income</th><th>Reported EPS</th><th>Filing</th></tr></thead>
+          <tbody data-earnings-rows></tbody>
+        </table></div>
+        <p class="earnings-scope">This SEC view includes quarters with discrete 10-Q facts. It does not infer fourth-quarter EPS from an annual filing.</p>
+        <footer class="data-note"><p>SEC EDGAR · Original filings linked above.</p><p>Educational purposes only - not investment advice.</p></footer>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>import '../scripts/finance.ts';</script>
+
+<style>
+  .finance-page { padding-top:clamp(4rem,8vw,8rem); padding-bottom:7rem; }
+  .finance-intro { display:grid; grid-template-columns:1.5fr .7fr; gap:4rem; align-items:end; margin-bottom:clamp(3rem,6vw,6rem); }
+  .finance-back { display:inline-flex; align-items:center; gap:.65rem; margin-bottom:1.75rem; padding:.7rem .9rem; border:1px solid var(--line); border-radius:999px; background:var(--paper); color:var(--ink); font:500 .68rem var(--mono); text-transform:uppercase; text-decoration:none; transition:background .2s,border-color .2s,color .2s; }
+  .finance-back:hover,.finance-back:focus-visible { border-color:var(--ink); background:var(--ink); color:var(--paper); outline:0; }
+  .finance-intro h1 { margin:0; max-width:62rem; font-size:clamp(3.6rem,7vw,7rem); line-height:.9; letter-spacing:-.055em; font-weight:500; }
+  .finance-intro-aside p { max-width:30rem; margin:0 0 1.25rem; color:var(--muted); }
+  .company-toolbar { display:grid; grid-template-columns:1.35fr .65fr; border:1px solid var(--line); background:color-mix(in srgb,var(--panel) 48%,transparent); }
+  .company-toolbar form { padding:1.15rem 1.4rem; border-right:1px solid var(--line); }
+  .company-toolbar label { display:block; margin-bottom:.4rem; color:var(--muted); font:.61rem var(--mono); text-transform:uppercase; }
+  .company-toolbar form > div { display:flex; border-bottom:1px solid var(--ink); }
+  .company-toolbar input { min-width:0; flex:1; border:0; outline:0; padding:.45rem 0; background:transparent; color:var(--ink); font:500 1rem var(--sans); }
+  .company-toolbar button { border:0; background:transparent; color:var(--ink); font-size:1.35rem; cursor:pointer; }
+  .company-toolbar > a { position:relative; display:flex; flex-direction:column; justify-content:center; padding:1.15rem 3rem 1.15rem 1.4rem; color:var(--ink); text-decoration:none; }
+  .company-toolbar > a:hover,.company-toolbar > a:focus-visible { background:var(--panel); outline:0; }
+  .company-toolbar > a span { color:var(--muted); font:.61rem var(--mono); text-transform:uppercase; }
+  .company-toolbar > a strong { margin-top:.35rem; font-size:.9rem; font-weight:500; }
+  .company-toolbar > a i { position:absolute; right:1.3rem; font-style:normal; color:var(--ochre); }
+  .company-toolbar > p { grid-column:1/-1; min-height:2.2rem; margin:0; padding:.6rem 1.4rem; border-top:1px solid var(--line); color:var(--muted); font:.67rem var(--mono); }
+  .company-toolbar > p[data-kind='error'] { color:#9a433d; }
+  .company-toolbar > p[data-kind='success'] { color:#55774f; }
+  .company-tabs { display:flex; gap:0; margin-top:2rem; border-bottom:1px solid var(--line); }
+  .company-tabs a,.company-tabs > span { padding:.8rem 1.15rem; color:var(--muted); font:.68rem var(--mono); text-decoration:none; text-transform:uppercase; }
+  .company-tabs a:hover,.company-tabs a:focus-visible { color:var(--ink); outline:0; }
+  .company-tabs a[aria-current='page'] { border-bottom:2px solid var(--ochre); color:var(--ink); }
+  .company-tabs small { margin-left:.3rem; padding:.15rem .3rem; background:var(--panel); font-size:.52rem; }
+  .empty-state { border:1px solid var(--line); border-top:0; padding:3rem; }
+  .empty-state p:last-child { margin:0; color:var(--muted); }
+  .stock-results { border-inline:1px solid var(--line); }
+  .quote-panel,.chart-panel,.business-panel { padding:clamp(1.25rem,3vw,2.5rem); border-bottom:1px solid var(--line); }
+  .company-heading,.chart-heading { display:flex; justify-content:space-between; gap:2rem; align-items:flex-end; }
+  .company-heading h2,.chart-panel h2,.business-panel h2,.financials-panel h2 { margin:0; font-size:clamp(2rem,4vw,3.8rem); line-height:1; font-weight:500; letter-spacing:-.045em; }
+  .company-classification { margin:.6rem 0 0; color:var(--muted); font:.7rem var(--mono); }
+  .quote-value { text-align:right; flex:0 0 auto; }
+  .quote-value strong { display:block; font:500 clamp(2.4rem,5vw,5rem)/.95 var(--mono); letter-spacing:-.07em; }
+  .quote-value span { display:inline-block; margin-top:.7rem; padding:.3rem .5rem; font:500 .76rem var(--mono); }
+  [data-direction='positive'] { color:#3f7040; }
+  [data-direction='negative'] { color:#9a433d; }
+  .quote-value span[data-direction='positive'] { background:color-mix(in srgb,#6ea06b 18%,transparent); }
+  .quote-value span[data-direction='negative'] { background:color-mix(in srgb,#b95f56 16%,transparent); }
+  .quote-value span[data-direction='neutral'] { color:var(--muted); background:var(--panel); }
+  .metric-grid { display:grid; grid-template-columns:repeat(3,1fr); margin-top:2.5rem; border-top:1px solid var(--line); border-left:1px solid var(--line); }
+  .metric-grid article { min-height:115px; padding:1rem; border-right:1px solid var(--line); border-bottom:1px solid var(--line); display:flex; flex-direction:column; justify-content:space-between; }
+  .metric-grid p,.financial-chart-grid p { margin:0; color:var(--muted); font:.64rem var(--mono); text-transform:uppercase; }
+  .metric-grid strong { font:500 clamp(1.15rem,2vw,1.8rem)/1 var(--mono); }
+  .chart-heading { margin-bottom:2rem; }
+  .chart-heading > span { color:var(--muted); font:.67rem var(--mono); text-transform:uppercase; }
+  .chart-performance { margin:.7rem 0 0; font:500 .8rem var(--mono); }
+  .range-selector { display:flex; width:max-content; max-width:100%; margin:0 0 1.5rem auto; border:1px solid var(--line); overflow-x:auto; }
+  .range-selector button { min-width:3.25rem; border:0; border-right:1px solid var(--line); padding:.55rem .8rem; background:transparent; color:var(--muted); font:500 .67rem var(--mono); cursor:pointer; }
+  .range-selector button:last-child { border-right:0; }
+  .range-selector button:hover,.range-selector button:focus-visible { color:var(--ink); outline:0; }
+  .range-selector button[aria-pressed='true'] { background:var(--ink); color:var(--paper); }
+  .chart-wrap { position:relative; height:clamp(240px,35vw,430px); }
+  .chart-wrap:focus-visible { outline:1px solid var(--ochre); outline-offset:4px; }
+  .chart-wrap svg { display:block; width:100%; height:100%; overflow:hidden; touch-action:none; }
+  .chart-wrap > p { position:absolute; inset:0; display:grid; place-items:center; margin:0; color:var(--muted); font-size:.85rem; pointer-events:none; }
+  .chart-tooltip { position:absolute; z-index:2; min-width:8.5rem; padding:.65rem .75rem; border:1px solid var(--line); background:color-mix(in srgb,var(--paper) 94%,transparent); box-shadow:0 8px 24px color-mix(in srgb,var(--ink) 10%,transparent); pointer-events:none; }
+  .chart-tooltip time,.chart-tooltip strong { display:block; white-space:nowrap; }
+  .chart-tooltip time { color:var(--muted); font:.62rem var(--mono); text-transform:uppercase; }
+  .chart-tooltip strong { margin-top:.2rem; font:500 .9rem var(--mono); }
+  :global(.chart-grid-line),:global(.financial-grid) { stroke:var(--line); stroke-width:1; vector-effect:non-scaling-stroke; }
+  :global(.chart-area) { fill:color-mix(in srgb,var(--ochre) 12%,transparent); }
+  :global(.chart-line),:global(.financial-line) { fill:none; stroke:var(--ochre); stroke-width:2; vector-effect:non-scaling-stroke; }
+  :global(.chart-axis-label),:global(.financial-axis) { fill:var(--muted); font:10px var(--mono); }
+  :global(.chart-crosshair) { stroke:color-mix(in srgb,var(--ink) 45%,transparent); stroke-width:1; stroke-dasharray:3 3; vector-effect:non-scaling-stroke; }
+  :global(.chart-hover-dot) { fill:var(--paper); stroke:var(--ochre); stroke-width:2; vector-effect:non-scaling-stroke; }
+  .business-panel { display:grid; grid-template-columns:.75fr 1.25fr; gap:4rem; }
+  .business-copy > p { margin:0; color:var(--muted); line-height:1.75; }
+  .profile-grid { display:grid; grid-template-columns:1fr 1fr; margin-top:2rem; border-top:1px solid var(--line); border-left:1px solid var(--line); }
+  .profile-grid article { min-height:95px; padding:.9rem; border-right:1px solid var(--line); border-bottom:1px solid var(--line); display:flex; flex-direction:column; justify-content:space-between; }
+  .profile-grid span { color:var(--muted); font:.6rem var(--mono); text-transform:uppercase; }
+  .profile-grid strong,.profile-grid a { color:var(--ink); font:500 .82rem var(--mono); text-decoration:none; overflow-wrap:anywhere; }
+  .profile-grid a:hover { color:var(--ochre); }
+  .data-note { display:flex; justify-content:space-between; gap:2rem; padding:1rem clamp(1.25rem,3vw,2.5rem); border-bottom:1px solid var(--line); color:var(--muted); font:.65rem var(--mono); }
+  .data-note p { margin:0; }
+  .financials-panel,.earnings-panel { border:1px solid var(--line); border-top:0; }
+  .financials-panel > header,.earnings-panel > header { display:grid; grid-template-columns:1.2fr .8fr; gap:3rem; align-items:end; padding:clamp(1.25rem,3vw,2.5rem); }
+  .financials-panel > header > p,.earnings-panel > header > p { margin:0; color:var(--muted); }
+  .earnings-next,.earnings-scope { margin:0; padding:1rem clamp(1.25rem,3vw,2.5rem); color:var(--muted); font:.7rem var(--mono); }
+  .earnings-next strong { margin-left:.5rem; color:var(--ink); font-weight:500; }
+  .financials-status { margin:0; padding:1rem clamp(1.25rem,3vw,2.5rem); border-top:1px solid var(--line); color:var(--muted); font:.68rem var(--mono); }
+  .financials-status[data-kind='error'] { color:#9a433d; }
+  .financial-chart-grid { display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--line); }
+  .financial-chart-grid article { padding:1.2rem; border-right:1px solid var(--line); }
+  .financial-chart-grid article:last-child { border-right:0; }
+  .financial-chart-grid strong { display:block; margin-top:.65rem; font:500 1.45rem var(--mono); }
+  .financial-chart-grid svg { display:block; width:100%; height:150px; margin-top:1rem; }
+  .financial-table-wrap { overflow-x:auto; border-top:1px solid var(--line); }
+  .financial-table-wrap table { width:100%; min-width:980px; border-collapse:collapse; table-layout:auto; }
+  :global(.financial-table-wrap th),:global(.financial-table-wrap td) { padding:1rem 1.25rem; border-right:1px solid var(--line); border-bottom:1px solid var(--line); text-align:right; vertical-align:middle; white-space:nowrap; font:.75rem/1.4 var(--mono); }
+  :global(.financial-table-wrap th:first-child),:global(.financial-table-wrap td:first-child) { padding-left:1.5rem; text-align:left; }
+  :global(.financial-table-wrap th:last-child),:global(.financial-table-wrap td:last-child) { padding-right:1.5rem; border-right:0; }
+  :global(.financial-table-wrap th) { background:color-mix(in srgb,var(--panel) 65%,transparent); color:var(--muted); font-size:.62rem; letter-spacing:.04em; text-transform:uppercase; }
+  :global(.financial-table-wrap tbody tr:nth-child(even) td) { background:color-mix(in srgb,var(--panel) 32%,transparent); }
+  :global(.financial-table-wrap tbody tr:hover td) { background:var(--panel); }
+  :global(.financial-table-wrap td a) { color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
+  :global(.financial-table-wrap td a:hover),:global(.financial-table-wrap td a:focus-visible) { color:var(--ochre); }
+  .balance-grid { display:grid; grid-template-columns:repeat(3,1fr); }
+  .balance-grid article { min-height:105px; padding:1rem; border-right:1px solid var(--line); display:flex; flex-direction:column; justify-content:space-between; }
+  .balance-grid article:last-child { border-right:0; }
+  .balance-grid span { color:var(--muted); font:.62rem var(--mono); text-transform:uppercase; }
+  .balance-grid strong { font:500 1.4rem var(--mono); }
+  [hidden] { display:none !important; }
+  [aria-busy='true'] .stock-results { opacity:.55; }
+  @media (max-width:800px) {
+    .finance-intro,.business-panel,.financials-panel > header,.earnings-panel > header { grid-template-columns:1fr; gap:2rem; }
+    .metric-grid,.financial-chart-grid { grid-template-columns:repeat(2,1fr); }
+    .financial-chart-grid article { border-bottom:1px solid var(--line); }
+    .financial-chart-grid article:last-child { grid-column:1/-1; }
+  }
+  @media (max-width:600px) {
+    .finance-page { padding-top:3.5rem; padding-bottom:5rem; }
+    .finance-intro { margin-bottom:4rem; }
+    .finance-intro h1 { font-size:clamp(3.1rem,15vw,4.5rem); }
+    .company-toolbar { grid-template-columns:1fr; }
+    .company-toolbar form { border-right:0; border-bottom:1px solid var(--line); }
+    .company-heading,.chart-heading { display:block; }
+    .quote-value { margin-top:2rem; text-align:left; }
+    .metric-grid,.financial-chart-grid,.balance-grid,.profile-grid { grid-template-columns:1fr 1fr; }
+    .financial-chart-grid article:last-child { grid-column:1/-1; }
+    .range-selector { width:100%; margin-left:0; }
+    .range-selector button { flex:1 0 3rem; min-width:3rem; padding-inline:.55rem; }
+    .data-note { display:block; }
+    .data-note p + p { margin-top:.6rem; }
+  }
+</style>

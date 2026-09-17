@@ -1,0 +1,125 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import en from '../../i18n/en.json';
+import stocks from '../../../../backend/src/main/resources/fmp-supported-tickers.json';
+const apiBase = import.meta.env.PUBLIC_FINANCE_API_BASE_URL || 'https://server.batyrbek.com';
+---
+<BaseLayout title="Compare Companies - Market Atlas" description="Compare relative performance, real share prices, and key company metrics.">
+  <Header active="Finance" />
+  <main class="compare-page page-shell" data-compare-app data-api-base={apiBase}>
+    <header class="compare-intro"><a href="/finance"><span class="arrow-icon arrow-back" aria-hidden="true"></span>{en.finance.compare.back}</a><p class="eyebrow section-label">{en.finance.compare.label}</p><h1 set:html={en.finance.compare.heading}></h1><p>{en.finance.compare.intro}</p></header>
+
+    <section class="compare-controls" aria-labelledby="compare-heading">
+      <div><p class="eyebrow">{en.finance.compare.select}</p><h2 id="compare-heading">{en.finance.compare.build}</h2></div>
+      <form data-compare-form>
+        <label>{en.finance.compare.first}<input data-first-symbol list="compare-companies" value="NVDA" maxlength="10" autocomplete="off" /></label><span>{en.finance.compare.vs}</span><label>{en.finance.compare.second}<input data-second-symbol list="compare-companies" value="AMD" maxlength="10" autocomplete="off" /></label>
+        <datalist id="compare-companies">{stocks.map(stock => <option value={stock.symbol}>{stock.name}</option>)}</datalist>
+        <button class="button button-dark" type="submit">{en.finance.compare.button}</button>
+      </form>
+      <p data-compare-status role="status" aria-live="polite">{en.finance.compare.loading}</p>
+    </section>
+
+    <section class="compare-chart-panel" data-compare-results hidden>
+      <div class="compare-heading"><div><p class="eyebrow">{en.finance.compare.normalized}</p><h2 data-compare-title>NVDA vs AMD</h2></div><div class="compare-legend"><span><i></i><b data-first-label>NVDA</b> <em data-first-return>-</em></span><span><i></i><b data-second-label>AMD</b> <em data-second-return>-</em></span></div></div><p class="chart-explainer">{en.finance.compare.explainer}</p>
+      <div class="compare-ranges" role="group" aria-label="Comparison range">{['1M', '6M', '1Y', '2Y', '5Y'].map(range => <button type="button" data-compare-range={range.toLowerCase()} aria-pressed={range === '1Y'}>{range}</button>)}</div>
+      <div class="compare-chart" data-compare-chart-wrap tabindex="0" aria-label="Use pointer or arrow keys to inspect both share prices">
+        <svg data-compare-chart role="img" aria-label="Normalized company performance comparison"></svg>
+        <div class="compare-tooltip" data-compare-tooltip hidden><time data-tooltip-date></time><span><i></i><b data-tooltip-first-label>NVDA</b><strong data-tooltip-first-price>-</strong></span><span><i></i><b data-tooltip-second-label>AMD</b><strong data-tooltip-second-price>-</strong></span></div>
+        <p data-chart-message></p>
+      </div>
+    </section>
+
+    <section class="comparison-table" data-comparison-table hidden aria-labelledby="metrics-heading">
+      <p class="eyebrow section-label">{en.finance.compare.sideBySide}</p><h2 id="metrics-heading">{en.finance.compare.metricsHeading}</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>{en.finance.compare.metric}</th><th data-table-first>NVDA</th><th data-table-second>AMD</th></tr></thead>
+        <tbody>
+          <tr class="category-row"><th colspan="3">{en.finance.compare.valuation}</th></tr><tr><td>{en.finance.compare.marketCap}</td><td data-first-market-cap>-</td><td data-second-market-cap>-</td></tr><tr><td>{en.finance.compare.peRatio}</td><td data-first-pe>-</td><td data-second-pe>-</td></tr><tr><td>{en.finance.compare.eps}</td><td data-first-eps>-</td><td data-second-eps>-</td></tr><tr class="category-row"><th colspan="3">{en.finance.compare.performance}</th></tr>
+          <tr><td>1 month return</td><td data-first-return-1m>-</td><td data-second-return-1m>-</td></tr>
+          <tr><td>6 month return</td><td data-first-return-6m>-</td><td data-second-return-6m>-</td></tr>
+          <tr><td>1 year return</td><td data-first-return-1y>-</td><td data-second-return-1y>-</td></tr>
+          <tr><td data-long-return-label>5 year return</td><td data-first-return-long>-</td><td data-second-return-long>-</td></tr>
+          <tr class="category-row"><th colspan="3">Trading range</th></tr>
+          <tr><td>52-week low</td><td data-first-low>-</td><td data-second-low>-</td></tr>
+          <tr><td>52-week high</td><td data-first-high>-</td><td data-second-high>-</td></tr>
+          <tr class="category-row"><th colspan="3">Income and cash flow</th></tr>
+          <tr><td>Annual revenue</td><td data-first-revenue>-</td><td data-second-revenue>-</td></tr>
+          <tr><td>Net income</td><td data-first-net-income>-</td><td data-second-net-income>-</td></tr>
+          <tr><td>Free cash flow</td><td data-first-fcf>-</td><td data-second-fcf>-</td></tr>
+          <tr class="category-row"><th colspan="3">Financial health</th></tr>
+          <tr><td>Cash &amp; equivalents</td><td data-first-cash>-</td><td data-second-cash>-</td></tr>
+          <tr><td>Total debt</td><td data-first-debt>-</td><td data-second-debt>-</td></tr>
+          <tr><td>Net margin</td><td data-first-margin>-</td><td data-second-margin>-</td></tr>
+        </tbody>
+      </table></div>
+      <div class="financial-compare-actions"><button type="button" data-load-financials>Load annual statements</button><p class="financial-compare-status" data-financial-compare-status>Annual statement metrics are optional and cached for seven days.</p></div>
+    </section>
+    <footer class="compare-note"><span>Relative performance is rebased to 100 for the selected period.</span><span>Educational purposes only - not investment advice.</span></footer>
+  </main>
+  <Footer />
+</BaseLayout>
+<script>import '../../scripts/finance-compare.ts';</script>
+<style>
+  .compare-page { padding-top:clamp(4rem,8vw,8rem); padding-bottom:7rem; }
+  .compare-intro { display:grid; grid-template-columns:1.35fr .65fr; gap:1rem 4rem; align-items:end; margin-bottom:clamp(4rem,8vw,7rem); }
+  .compare-intro > a,.compare-intro .eyebrow { grid-column:1/-1; }
+  .compare-intro > a { display:inline-flex; align-items:center; gap:.65rem; width:max-content; padding:.7rem .9rem; border:1px solid var(--line); border-radius:999px; background:var(--paper); color:var(--ink); font:500 .68rem var(--mono); text-decoration:none; text-transform:uppercase; transition:background .2s,border-color .2s,color .2s; }
+  .compare-intro > a:hover,.compare-intro > a:focus-visible { border-color:var(--ink); background:var(--ink); color:var(--paper); outline:0; }
+  .compare-intro h1 { margin:0; font-size:clamp(3.8rem,7vw,7rem); line-height:.9; letter-spacing:-.06em; font-weight:500; }
+  .compare-intro > p:last-child { max-width:31rem; margin:0 0 .5rem; color:var(--muted); }
+  .compare-controls,.compare-chart-panel { border:1px solid var(--line); padding:clamp(1.25rem,3vw,2.5rem); background:color-mix(in srgb,var(--panel) 48%,transparent); }
+  .compare-controls h2,.compare-chart-panel h2,.comparison-table h2 { margin:0; font-size:clamp(2rem,4vw,3.6rem); line-height:1; letter-spacing:-.045em; font-weight:500; }
+  .compare-controls form { display:grid; grid-template-columns:1fr auto 1fr auto; gap:1rem; align-items:end; margin-top:2.5rem; }
+  .compare-controls label { color:var(--muted); font:.64rem var(--mono); text-transform:uppercase; }
+  .compare-controls input { display:block; width:100%; box-sizing:border-box; margin-top:.5rem; border:0; border-bottom:1px solid var(--ink); border-radius:0; padding:.75rem 0; background:transparent; color:var(--ink); font:500 1rem var(--mono); text-transform:uppercase; }
+  .compare-controls form > span { padding-bottom:.85rem; color:var(--muted); font:.68rem var(--mono); text-transform:uppercase; }
+  .compare-controls [data-compare-status],.financial-compare-status { min-height:1.2rem; margin:1.2rem 0 0; color:var(--muted); font:.68rem var(--mono); }
+  .financial-compare-actions { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:1.2rem; }
+  .financial-compare-actions .financial-compare-status { margin:0; }
+  .financial-compare-actions button { flex:0 0 auto; border:1px solid var(--line); padding:.55rem .8rem; background:transparent; color:var(--ink); font:.65rem var(--mono); cursor:pointer; text-transform:uppercase; }
+  .financial-compare-actions button:hover,.financial-compare-actions button:focus-visible { border-color:var(--ink); background:var(--ink); color:var(--paper); outline:0; }
+  .financial-compare-actions button:disabled { opacity:.55; cursor:wait; }
+  [data-kind='error'] { color:#9a433d !important; }
+  .compare-chart-panel { border-top:0; }
+  .compare-heading { display:flex; justify-content:space-between; gap:2rem; align-items:end; }
+  .compare-legend { display:flex; gap:1.25rem; flex-wrap:wrap; font:.7rem var(--mono); }
+  .compare-legend span { display:flex; align-items:center; gap:.4rem; }
+  .compare-legend i,.compare-tooltip span i { width:1.5rem; height:2px; background:var(--ochre); }
+  .compare-legend span:nth-child(2) i,.compare-tooltip span:nth-child(3) i { background:#55774f; }
+  .compare-legend em { color:var(--muted); font-style:normal; }
+  .chart-explainer { margin:1rem 0 0; color:var(--muted); font-size:.75rem; }
+  .compare-ranges { display:flex; width:max-content; margin:2rem 0 1rem auto; border:1px solid var(--line); }
+  .compare-ranges button { border:0; border-right:1px solid var(--line); padding:.55rem .9rem; background:transparent; color:var(--muted); font:.68rem var(--mono); cursor:pointer; }
+  .compare-ranges button:last-child { border-right:0; }
+  .compare-ranges button[aria-pressed='true'] { background:var(--ink); color:var(--paper); }
+  .compare-chart { position:relative; height:clamp(280px,40vw,470px); }
+  .compare-chart:focus-visible { outline:1px solid var(--ochre); outline-offset:3px; }
+  .compare-chart svg { width:100%; height:100%; display:block; touch-action:none; }
+  .compare-chart > p { position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); pointer-events:none; }
+  .compare-tooltip { position:absolute; z-index:3; min-width:13rem; padding:.7rem .8rem; border:1px solid var(--line); background:color-mix(in srgb,var(--paper) 96%,transparent); box-shadow:0 8px 24px color-mix(in srgb,var(--ink) 10%,transparent); pointer-events:none; }
+  .compare-tooltip time { display:block; margin-bottom:.45rem; color:var(--muted); font:.62rem var(--mono); text-transform:uppercase; }
+  .compare-tooltip span { display:grid; grid-template-columns:1.5rem 3.5rem 1fr; gap:.45rem; align-items:center; font:.68rem var(--mono); }
+  .compare-tooltip span + span { margin-top:.35rem; }
+  .compare-tooltip strong { text-align:right; font-weight:500; }
+  :global(.compare-grid) { stroke:var(--line); stroke-width:1; vector-effect:non-scaling-stroke; }
+  :global(.compare-axis) { fill:var(--muted); font:10px var(--mono); }
+  :global(.compare-line-first),:global(.compare-line-second) { fill:none; stroke-width:2; vector-effect:non-scaling-stroke; }
+  :global(.compare-line-first) { stroke:var(--ochre); }
+  :global(.compare-line-second) { stroke:#55774f; }
+  :global(.compare-crosshair) { stroke:color-mix(in srgb,var(--ink) 45%,transparent); stroke-width:1; stroke-dasharray:3 3; vector-effect:non-scaling-stroke; }
+  :global(.compare-dot-first),:global(.compare-dot-second) { fill:var(--paper); stroke-width:2; vector-effect:non-scaling-stroke; }
+  :global(.compare-dot-first) { stroke:var(--ochre); } :global(.compare-dot-second) { stroke:#55774f; }
+  .comparison-table { padding-top:6rem; margin-top:6rem; border-top:1px solid var(--line); }
+  .table-wrap { overflow-x:auto; margin-top:2.5rem; }
+  table { width:100%; border-collapse:collapse; min-width:620px; }
+  th,td { padding:1rem; border:1px solid var(--line); text-align:right; font:500 .8rem var(--mono); }
+  th:first-child,td:first-child { text-align:left; color:var(--muted); text-transform:uppercase; }
+  thead th { background:var(--panel); }
+  .category-row th { padding:.55rem 1rem; background:color-mix(in srgb,var(--panel) 55%,transparent); color:var(--muted); font-size:.58rem; letter-spacing:.07em; text-align:left; text-transform:uppercase; }
+  .compare-note { display:flex; justify-content:space-between; gap:2rem; margin-top:6rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font:.65rem var(--mono); }
+  [hidden] { display:none !important; }
+  @media (max-width:800px) { .compare-intro { grid-template-columns:1fr; } .compare-controls form { grid-template-columns:1fr 1fr; } .compare-controls form > span { display:none; } }
+  @media (max-width:600px) { .compare-page { padding-top:3.5rem; } .compare-controls form { grid-template-columns:1fr; } .compare-heading { display:block; } .compare-legend { margin-top:1.5rem; } .compare-ranges { width:100%; } .compare-ranges button { flex:1; } .financial-compare-actions { align-items:flex-start; flex-direction:column; } .compare-note { display:block; } .compare-note span { display:block; } .compare-note span + span { margin-top:.6rem; } }
+</style>

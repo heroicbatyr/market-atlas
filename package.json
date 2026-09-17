@@ -1,0 +1,12 @@
+{
+  "name": "market-atlas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-of-day U.S. stock research dashboard",
+  "scripts": {
+    "build": "npm --prefix frontend run build"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.6.1"
+  }
+}

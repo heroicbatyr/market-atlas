@@ -1,0 +1,11 @@
+---
+import FinanceResearch from '../../components/FinanceResearch.astro';
+
+const stock = {
+  symbol: 'TICKER',
+  name: 'Company research',
+  sector: 'U.S. equity',
+  category: 'A company selected from Market Atlas search'
+};
+---
+<FinanceResearch stock={stock} genericTicker />

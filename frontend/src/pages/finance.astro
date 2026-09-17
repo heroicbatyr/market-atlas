@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import stocks from '../../../backend/src/main/resources/fmp-supported-tickers.json';
+import en from '../i18n/en.json';
+
+const popular = stocks.filter(stock => stock.popular).slice(0, 12);
+const sectors = [...new Set(stocks.map(stock => stock.sector))];
+const defaultSector = 'Financials';
+const defaultSectorStocks = stocks.filter(stock => stock.sector === defaultSector);
+const apiBase = import.meta.env.PUBLIC_FINANCE_API_BASE_URL || 'https://server.batyrbek.com';
+---
+<BaseLayout title={en.meta.marketAtlasTitle} description={en.meta.marketAtlasDescription}>
+  <Header active="Finance" />
+  <main class="atlas-page page-shell" data-finance-landing data-api-base={apiBase} data-stocks={JSON.stringify(stocks)} data-copy={JSON.stringify(en.finance.landing)}>
+    <header class="atlas-intro">
+      <p class="eyebrow section-label">{en.finance.landing.label}</p><h1>{en.finance.landing.heading}</h1><p>{en.finance.landing.intro}</p>
+    </header>
+
+    <section class="atlas-search" aria-labelledby="search-heading">
+      <div class="atlas-search-heading">
+        <div><p class="eyebrow">{en.finance.landing.researchLabel}</p><h2 id="search-heading" data-random-heading>{en.finance.landing.prompts[0]}</h2></div><a class="button button-dark" href="/finance/compare">{en.finance.landing.compare}</a>
+      </div>
+      <form data-catalog-form>
+        <label for="company-search">{en.finance.landing.searchLabel}</label>
+        <div class="search-control">
+          <input id="company-search" data-catalog-input autocomplete="off" placeholder={en.finance.landing.searchPlaceholder} aria-controls="catalog-results" aria-autocomplete="list" /><button type="submit" aria-label={en.finance.landing.openCompany}><span class="arrow-icon" aria-hidden="true"></span></button>
+        </div>
+        <div class="catalog-results" id="catalog-results" data-catalog-results role="listbox" hidden></div>
+        <p class="catalog-status" data-catalog-status aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="atlas-section" aria-labelledby="popular-heading">
+      <div class="section-heading"><div><p class="eyebrow section-label">{en.finance.landing.popularLabel}</p><h2 id="popular-heading">{en.finance.landing.popularHeading}</h2></div></div>
+      <div class="company-grid">
+        {popular.map(stock =>
+          <a href={`/finance/${stock.symbol}`}>
+            <span>{stock.symbol}</span><strong>{stock.name}</strong><small>{stock.sector}</small><i class="arrow-icon" aria-hidden="true"></i>
+          </a>)}
+      </div>
+    </section>
+
+    <section class="atlas-section sector-section" aria-labelledby="sector-heading">
+      <p class="eyebrow section-label">{en.finance.landing.sectorLabel}</p><h2 id="sector-heading">{en.finance.landing.sectorHeading}</h2>
+      <div class="sector-pills">
+        {sectors.map(sector => <button type="button" data-sector={sector} aria-pressed={sector === defaultSector}>{sector}</button>)}
+      </div>
+      <div class="sector-results" data-sector-results>
+        {defaultSectorStocks.map(stock =>
+          <a class="sector-card" href={`/finance/${stock.symbol}`}>
+            <b>{stock.symbol}</b><strong>{stock.name}</strong><small>{stock.category}</small><i class="arrow-icon" aria-hidden="true"></i>
+          </a>)}
+      </div>
+    </section>
+
+    <section class="atlas-section recent-section" data-recent-section hidden aria-labelledby="recent-heading">
+      <p class="eyebrow section-label">{en.finance.landing.recentLabel}</p><h2 id="recent-heading">{en.finance.landing.recentHeading}</h2>
+      <div class="recent-list" data-recent-list></div>
+    </section>
+
+    <footer class="atlas-note">
+      <span>{en.finance.landing.endOfDay}</span><span>{en.common.educationOnly}</span>
+    </footer>
+
+    <section class="atlas-build-note">
+      <p class="eyebrow section-label">{en.finance.landing.architectureLabel}</p><div><h2>{en.finance.landing.architectureHeading}</h2><p>{en.finance.landing.architectureCopy}</p></div>
+    </section>
+
+    <section class="atlas-case-study-link" aria-labelledby="case-study-heading">
+      <div><p class="eyebrow">{en.finance.landing.caseLabel}</p><h2 id="case-study-heading">{en.finance.landing.caseHeading}</h2></div><a class="text-link" href="https://github.com/heroicbatyr/market-atlas">View source <span class="arrow-icon" aria-hidden="true"></span></a>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  import '../scripts/finance-landing.ts';
+</script>
+
+<style>
+  .atlas-page { padding-top:clamp(4rem,8vw,8rem); padding-bottom:7rem; }
+  .atlas-intro { display:grid; grid-template-columns:1.35fr .65fr; column-gap:4rem; align-items:end; margin-bottom:clamp(4rem,8vw,7rem); }
+  .atlas-intro .eyebrow { grid-column:1/-1; }
+  .atlas-intro h1 { margin:0; font-size:clamp(4.2rem,9vw,8.5rem); line-height:.86; letter-spacing:-.065em; font-weight:500; }
+  .atlas-intro > p:last-child { max-width:31rem; margin:0 0 .5rem; color:var(--muted); }
+  .atlas-search { position:relative; border:1px solid var(--line); background:color-mix(in srgb,var(--panel) 48%,transparent); padding:clamp(1.25rem,3vw,2.5rem); }
+  .atlas-search-heading { display:flex; justify-content:space-between; align-items:end; gap:2rem; }
+  .atlas-search h2,.atlas-section h2 { margin:0; font-size:clamp(2rem,4vw,3.8rem); line-height:1; font-weight:500; letter-spacing:-.045em; }
+  .atlas-search form { position:relative; max-width:60rem; margin-top:3rem; }
+  .atlas-search label { display:block; margin-bottom:.55rem; color:var(--muted); font:.65rem var(--mono); letter-spacing:.06em; text-transform:uppercase; }
+  .search-control { display:flex; border-bottom:1px solid var(--ink); }
+  .search-control input { width:100%; min-width:0; border:0; outline:0; padding:.85rem 0; background:transparent; color:var(--ink); font:500 clamp(1.4rem,3.5vw,2.6rem)/1 var(--sans); }
+  .search-control input::placeholder { color:color-mix(in srgb,var(--muted) 60%,transparent); }
+  .search-control button { width:4rem; border:0; background:transparent; color:var(--ink); font-size:1.8rem; cursor:pointer; }
+  .catalog-results { position:absolute; z-index:5; top:100%; left:0; right:0; border:1px solid var(--line); border-top:0; background:var(--paper); box-shadow:0 18px 45px color-mix(in srgb,var(--ink) 10%,transparent); }
+  .catalog-results a { display:grid; grid-template-columns:5rem 1fr auto; gap:1rem; padding:.85rem 1rem; color:var(--ink); text-decoration:none; border-top:1px solid var(--line); }
+  .catalog-results a:first-child { border-top:0; }
+  .catalog-results a:hover,.catalog-results a:focus-visible { background:var(--panel); outline:0; }
+  .catalog-results b { font:500 .82rem var(--mono); }
+  .catalog-results span { font-size:.86rem; }
+  .catalog-results small { color:var(--muted); }
+  .catalog-status { margin:.75rem 0 0; color:var(--muted); font:.68rem var(--mono); }
+  .catalog-status[data-kind='error'] { color:#9a433d; }
+  .atlas-section { padding-top:6rem; margin-top:6rem; border-top:1px solid var(--line); }
+  .section-heading { display:flex; justify-content:space-between; align-items:end; margin-bottom:2.5rem; }
+  .company-grid { display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--line); border-left:1px solid var(--line); }
+  .company-grid a { position:relative; min-height:155px; display:flex; flex-direction:column; padding:1.25rem; border-right:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--ink); text-decoration:none; transition:background .2s; }
+  .company-grid a:hover,.company-grid a:focus-visible { background:var(--panel); outline:0; }
+  .company-grid span { color:var(--ochre); font:.7rem var(--mono); }
+  .company-grid strong { margin-top:.65rem; max-width:16rem; font-size:1.15rem; font-weight:500; }
+  .company-grid small { margin-top:auto; color:var(--muted); font:.62rem var(--mono); text-transform:uppercase; }
+  .company-grid i { position:absolute; top:1rem; right:1rem; font-style:normal; color:var(--muted); }
+  .sector-section h2,.recent-section h2 { max-width:52rem; }
+  .sector-pills { display:flex; flex-wrap:wrap; gap:.6rem; margin-top:2.5rem; }
+  .sector-pills button { border:1px solid var(--line); padding:.65rem .9rem; background:transparent; color:var(--ink); font:.7rem var(--mono); cursor:pointer; }
+  .sector-pills button:hover,.sector-pills button:focus-visible,.sector-pills button[aria-pressed='true'] { border-color:var(--ink); background:var(--ink); color:var(--paper); outline:0; }
+  .sector-results,.recent-list { display:flex; flex-wrap:wrap; gap:.65rem; margin-top:1.5rem; }
+  .atlas-note { display:flex; justify-content:space-between; gap:2rem; margin-top:7rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font:.65rem var(--mono); }
+  .atlas-build-note { display:grid; grid-template-columns:1fr 2fr; gap:2rem; padding-top:6rem; margin-top:6rem; border-top:1px solid var(--line); }
+  .atlas-build-note > div { max-width:48rem; }
+  .atlas-build-note h2 { margin:0; font-size:clamp(2rem,4vw,3.8rem); line-height:1; letter-spacing:-.045em; font-weight:500; }
+  .atlas-build-note > div p { max-width:38rem; color:var(--muted); font-size:1.05rem; }
+  .atlas-case-study-link { display:flex; justify-content:space-between; align-items:end; gap:2rem; margin-top:3rem; padding:clamp(2rem,4vw,3.5rem); border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+  .atlas-case-study-link h2 { margin:0; font-size:clamp(2rem,4vw,3.8rem); line-height:1; letter-spacing:-.045em; font-weight:500; }
+  .atlas-case-study-link .eyebrow { margin-bottom:1rem; }
+  :global(.catalog-result) { display:grid; grid-template-columns:5rem 1fr auto; gap:1rem; align-items:center; padding:1rem; color:var(--ink); text-decoration:none; border-top:1px solid var(--line); }
+  :global(.catalog-result:first-child) { border-top:0; }
+  :global(.catalog-result:hover),:global(.catalog-result:focus-visible) { background:var(--panel); outline:0; }
+  :global(.catalog-result b) { color:var(--ochre); font:500 .8rem var(--mono); }
+  :global(.catalog-result span) { display:flex; flex-direction:column; gap:.2rem; }
+  :global(.catalog-result strong) { font-size:.9rem; font-weight:500; }
+  :global(.catalog-result small) { color:var(--muted); font:.62rem var(--mono); text-transform:uppercase; }
+  :global(.catalog-result i) { color:var(--muted); font-style:normal; }
+  .sector-results { display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:1.5rem; border-top:1px solid var(--line); border-left:1px solid var(--line); }
+  :global(.sector-card) { position:relative; min-height:160px; display:flex; flex-direction:column; padding:1.5rem; border-right:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--ink); text-decoration:none; font-family:var(--sans); }
+  :global(.sector-card:hover),:global(.sector-card:focus-visible) { background:var(--panel); outline:0; }
+  :global(.sector-card b) { color:var(--ochre); font:.7rem var(--mono); }
+  :global(.sector-card strong) { margin-top:.75rem; padding-right:2rem; font:500 1.05rem/1.25 var(--sans); }
+  :global(.sector-card small) { margin-top:auto; color:var(--muted); font:.6rem var(--mono); text-transform:uppercase; }
+  :global(.sector-card .arrow-icon) { position:absolute; top:1.5rem; right:1.5rem; color:var(--muted); }
+  .recent-list { display:grid; grid-template-columns:repeat(3,1fr); gap:.65rem; }
+  :global(.recent-card) { display:grid; grid-template-columns:4rem 1fr auto; gap:.6rem; align-items:center; border:1px solid var(--line); padding:.8rem; color:var(--ink); text-decoration:none; }
+  :global(.recent-card:hover),:global(.recent-card:focus-visible) { border-color:var(--ink); outline:0; }
+  :global(.recent-card b) { color:var(--ochre); font:.7rem var(--mono); }
+  :global(.recent-card span) { font-size:.78rem; }
+  :global(.recent-card i) { color:var(--muted); font-style:normal; }
+  @media (max-width:800px) {
+    .atlas-intro { grid-template-columns:1fr; row-gap:2rem; }
+    .company-grid,.sector-results,.recent-list { grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:600px) {
+    .atlas-page { padding-top:3.5rem; padding-bottom:5rem; }
+    .atlas-intro { margin-bottom:4rem; }
+    .atlas-intro h1 { font-size:clamp(3.8rem,18vw,5.5rem); }
+    .atlas-search-heading { display:block; }
+    .atlas-search-heading .button { margin-top:1.5rem; }
+    .company-grid,.sector-results,.recent-list { grid-template-columns:1fr; }
+    .company-grid a { min-height:125px; }
+    .catalog-results a { grid-template-columns:4rem 1fr; }
+    .catalog-results small { display:none; }
+    .atlas-note { display:block; }
+    .atlas-note span { display:block; }
+    .atlas-note span + span { margin-top:.6rem; }
+    .atlas-build-note { grid-template-columns:1fr; gap:1rem; padding-top:4rem; margin-top:4rem; }
+    .atlas-case-study-link { align-items:flex-start; flex-direction:column; }
+  }
+</style>

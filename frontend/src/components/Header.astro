@@ -1,0 +1,19 @@
+---
+const nav = [
+  ['Research', '/finance'],
+  ['Compare', '/finance/compare'],
+  ['Live demo', 'https://batyrbek.com/finance']
+];
+---
+<header class="site-header">
+  <a class="wordmark wordmark--atlas" href="/finance" aria-label="Market Atlas home">Market Atlas<span>.</span></a>
+  <nav aria-label="Primary navigation">
+    {nav.map(([label, href]) => <a href={href}>{label}</a>)}
+  </nav>
+  <div class="header-actions">
+    <button class="theme-toggle" data-theme-toggle type="button" aria-label="Toggle colour theme"><span></span></button>
+  </div>
+</header>
+<nav class="mobile-nav" aria-label="Mobile navigation">
+  {nav.map(([label, href]) => <a href={href}>{label}</a>)}
+</nav>

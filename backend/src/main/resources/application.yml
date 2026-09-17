@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: stock-research-api
+server:
+  port: ${PORT:8080}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+stock:
+  provider:
+    base-url: ${FMP_API_BASE_URL:https://financialmodelingprep.com}
+    api-key: ${FMP_API_KEY:}
+  massive:
+    base-url: ${MASSIVE_API_BASE_URL:https://api.massive.com}
+    api-key: ${MASSIVE_API_KEY:}
+    enabled: ${MASSIVE_PUBLIC_DISPLAY_ENABLED:true}
+    requests-per-minute: ${MASSIVE_REQUESTS_PER_MINUTE:5}
+  sec:
+    user-agent: ${SEC_USER_AGENT:Batyrbek Market Atlas/0.1 mail@batyrbek.com}
+  cache:
+    directory: ${FINANCE_CACHE_DIR:/app/data/cache}
+  backup:
+    url: ${FINANCE_BACKUP_URL:}
+    secret: ${FINANCE_BACKUP_SECRET:}
+  refresh:
+    tickers: ${STOCK_REFRESH_TICKERS:NVDA,AAPL,MSFT,JPM}
+    cron: "${STOCK_REFRESH_CRON:0 30 22 * * MON-FRI}"
+  cors:
+    allowed-origins: ${FINANCE_ALLOWED_ORIGINS:https://batyrbek.com,https://www.batyrbek.com,http://localhost:4321,http://127.0.0.1:4321}
