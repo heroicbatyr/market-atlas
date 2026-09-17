@@ -1,8 +1,12 @@
 # Market Atlas
 
+[![CI](https://github.com/heroicbatyr/market-atlas/actions/workflows/ci.yml/badge.svg)](https://github.com/heroicbatyr/market-atlas/actions/workflows/ci.yml)
+
 Market Atlas is an end-of-day U.S. stock research dashboard built to make company research calmer and easier to inspect. It combines price history, company fundamentals, SEC-backed financial statements, reported earnings, and side-by-side comparisons behind a small normalized API.
 
 **[Open the live demo](https://batyrbek.com/finance)**
+
+![Market Atlas NVIDIA company dashboard](docs/screenshots/dashboard.png)
 
 ## What it does
 
@@ -13,6 +17,12 @@ Market Atlas is an end-of-day U.S. stock research dashboard built to make compan
 - Coalesces concurrent provider requests and caches datasets independently.
 - Persists successful responses for graceful stale-data fallback during provider outages.
 - Optionally mirrors normalized overview and history snapshots to a private Vercel Blob store.
+
+## Product views
+
+![Market Atlas normalized NVDA and AMD comparison chart](docs/screenshots/comparison.png)
+
+*One-year normalized performance comparison with actual return figures and selectable ranges.*
 
 ## Architecture
 
